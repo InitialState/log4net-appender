@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>$id$</id>
+    <version>$version$</version>
+    <title>Log4Net Initial State Appender</title>
+    <authors>David Sulpy</authors>
+    <owners>Initial State Technologies, Inc</owners>
+    <licenseUrl>https://raw.githubusercontent.com/InitialState/log4net-appender/master/LICENSES.txt</licenseUrl>
+    <projectUrl>https://github.com/InitialState/log4net-appender</projectUrl>
+    <iconUrl>https://d15sof8kafei9a.cloudfront.net/is_logo_white2.png</iconUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>This package is for enabling the ability to add simple configuration to log4net configuration allowing log shipping to Initial State's log manager service.</description>
+    <releaseNotes></releaseNotes>
+    <copyright>Copyright 2014</copyright>
+    <tags>log4net initialstate</tags>
+  </metadata>
+</package>

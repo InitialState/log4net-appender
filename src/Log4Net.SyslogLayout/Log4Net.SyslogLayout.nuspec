@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>$id$</id>
+    <version>$version$</version>
+    <title>$title$</title>
+    <authors>merchantwarehouse, David Sulpy</authors>
+    <owners></owners>
+    <licenseUrl>https://raw.githubusercontent.com/InitialState/log4net-appender/master/src/Log4Net.SyslogLayout/LICENSE.txt</licenseUrl>
+    <projectUrl>https://github.com/InitialState/log4net-appender</projectUrl>
+    <iconUrl>https://d15sof8kafei9a.cloudfront.net/is_logo_white2.png</iconUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>This is a derrivative work from https://github.com/merchantwarehouse/syslog4net.</description>
+    <releaseNotes></releaseNotes>
+    <copyright>Copyright 2014</copyright>
+    <tags>InitialState log4net</tags>
+  </metadata>
+</package>

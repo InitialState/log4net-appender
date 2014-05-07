@@ -54,6 +54,7 @@
     <Compile Include="Utilities\PrintableAsciiSanitizer.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Log4Net.SyslogLayout.nuspec" />
     <None Include="packages.config" />
     <None Include="README.md" />
   </ItemGroup>

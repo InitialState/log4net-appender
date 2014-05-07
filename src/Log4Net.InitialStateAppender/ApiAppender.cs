@@ -36,7 +36,7 @@ namespace Log4Net.InitialStateAppender
             {
                 var typedLoggingEvent = (LoggingEvent) loggingEvent;
                 string logMessage = RenderLoggingEvent(typedLoggingEvent);
-                string url = string.Format("{0}{1}", ApiRootUrl, BucketId);
+                string url = string.Format("{0}{1}?clientKey={2}", ApiRootUrl, BucketId, ApiKey);
 
                 Trace.WriteLine(url);
                 Trace.WriteLine(logMessage);

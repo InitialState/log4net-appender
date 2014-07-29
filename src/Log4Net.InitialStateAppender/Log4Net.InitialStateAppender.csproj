@@ -55,6 +55,11 @@
     <None Include="Log4Net.InitialStateAppender.nuspec" />
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup>
+    <Content Include="..\..\IS.Appender_LICENSES.txt">
+      <Link>IS.Appender_LICENSES.txt</Link>
+    </Content>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
   <PropertyGroup>

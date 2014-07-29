@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package >
   <metadata>
-    <id>initialstate-log4net-appender</id>
+    <id>Log4Net.InitialStateAppender</id>
     <version>$version$</version>
     <title>InitialState log4net Appender</title>
     <authors>David Sulpy</authors>

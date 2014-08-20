@@ -12,6 +12,8 @@ namespace Log4Net.InitialStateAppender
 {
     public class ApiAppender : AppenderSkeleton
     {
+        private const string TrackerEndToken = "##}}";
+        private const string TrackerBeginToken = "{{##TrackerId:";
         public string ApiKey { get; set; }
         public string ApiRootUrl { get; set; }
         public Guid BucketId { get; set; }
@@ -48,11 +50,15 @@ namespace Log4Net.InitialStateAppender
                 webRequest.Proxy = null;
                 webRequest.ContentType = "application/json";
 
+                var trackerStartIndex = logMessage.IndexOf(TrackerBeginToken) + TrackerBeginToken.Length;
+                var trackerLength = logMessage.IndexOf(TrackerEndToken) - trackerStartIndex;
+                var trackerId = logMessage.Substring(trackerStartIndex, trackerLength);
                 string json = JsonConvert.SerializeObject(new LogMessageRequest
                                                           {
                                                               Log = logMessage,
                                                               DateTime = DateTime.UtcNow,
-                                                              SignalSource = typedLoggingEvent.LoggerName
+                                                              SignalSource = typedLoggingEvent.LoggerName,
+                                                              TrackerId = trackerId
                                                           });
                 byte[] contentBytes = Encoding.UTF8.GetBytes(json);
                 webRequest.ContentLength = contentBytes.Length;
@@ -76,6 +82,7 @@ namespace Log4Net.InitialStateAppender
             public string Log { get; set; }
             public DateTime DateTime { get; set; }
             public string SignalSource { get; set; }
+            public string TrackerId { get; set; }
         }
     }
 }

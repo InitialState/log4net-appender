@@ -50,9 +50,14 @@ namespace Log4Net.InitialStateAppender
                 webRequest.Proxy = null;
                 webRequest.ContentType = "application/json";
 
-                var trackerStartIndex = logMessage.IndexOf(TrackerBeginToken) + TrackerBeginToken.Length;
-                var trackerLength = logMessage.IndexOf(TrackerEndToken) - trackerStartIndex;
-                var trackerId = logMessage.Substring(trackerStartIndex, trackerLength);
+                string trackerId = null;
+                if (logMessage.Contains(TrackerBeginToken))
+                {
+                    var trackerStartIndex = logMessage.IndexOf(TrackerBeginToken) + TrackerBeginToken.Length;
+                    var trackerLength = logMessage.IndexOf(TrackerEndToken) - trackerStartIndex;
+                    trackerId = logMessage.Substring(trackerStartIndex, trackerLength);
+                }
+                
                 string json = JsonConvert.SerializeObject(new LogMessageRequest
                                                           {
                                                               Log = logMessage,

@@ -12,8 +12,8 @@ namespace Log4Net.InitialStateAppender
 {
     public class ApiAppender : AppenderSkeleton
     {
-        private const string TrackerEndToken = "##}}";
-        private const string TrackerBeginToken = "{{##TrackerId:";
+        private const string TrackerEndToken = "</tid>";
+        private const string TrackerBeginToken = "<tid>";
         public string ApiKey { get; set; }
         public string ApiRootUrl { get; set; }
         public Guid BucketId { get; set; }

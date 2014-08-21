@@ -53,9 +53,17 @@ namespace Log4Net.InitialStateAppender
                 string trackerId = null;
                 if (logMessage.Contains(TrackerBeginToken))
                 {
-                    var trackerStartIndex = logMessage.IndexOf(TrackerBeginToken) + TrackerBeginToken.Length;
-                    var trackerLength = logMessage.IndexOf(TrackerEndToken) - trackerStartIndex;
-                    trackerId = logMessage.Substring(trackerStartIndex, trackerLength);
+                    try
+                    {
+                        var trackerStartIndex = logMessage.IndexOf(TrackerBeginToken) + TrackerBeginToken.Length;
+                        var trackerLength = logMessage.IndexOf(TrackerEndToken) - trackerStartIndex;
+                        trackerId = logMessage.Substring(trackerStartIndex, trackerLength);
+                    }
+                    catch (Exception ex)
+                    {// we want to ignore exceptions here because the most critical part is logging the line.
+                        trackerId = string.Format("tid_ex: {0}", ex.Message);
+                        Trace.WriteLine(ex.Message);
+                    }
                 }
                 
                 string json = JsonConvert.SerializeObject(new LogMessageRequest

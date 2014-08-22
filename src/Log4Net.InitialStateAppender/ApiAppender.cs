@@ -4,6 +4,7 @@ using System.IO;
 using System.Net;
 using System.Text;
 using System.Threading;
+using log4net;
 using log4net.Appender;
 using log4net.Core;
 using Newtonsoft.Json;
@@ -12,11 +13,10 @@ namespace Log4Net.InitialStateAppender
 {
     public class ApiAppender : AppenderSkeleton
     {
-        private const string TrackerEndToken = "</tid>";
-        private const string TrackerBeginToken = "<tid>";
         public string ApiKey { get; set; }
         public string ApiRootUrl { get; set; }
         public Guid BucketId { get; set; }
+        public string Ndc { get; set; }
 
         protected override void Append(LoggingEvent loggingEvent)
         {
@@ -51,21 +51,15 @@ namespace Log4Net.InitialStateAppender
                 webRequest.ContentType = "application/json";
 
                 string trackerId = null;
-                var trackerStartIndex = 0;
-                var trackerLength = 0;
-                if (logMessage.Contains(TrackerBeginToken))
+                //if (!string.IsNullOrEmpty(typedLoggingEvent))
+
+                var ndc = LogicalThreadContext.Stacks["NDC"];
+
+                for (int i = 0; i < ndc.Count; i++)
                 {
-                    try
-                    {
-                        trackerStartIndex = logMessage.IndexOf(TrackerBeginToken) + TrackerBeginToken.Length;
-                        trackerLength = logMessage.IndexOf(TrackerEndToken) - trackerStartIndex;
-                        trackerId = logMessage.Substring(trackerStartIndex, trackerLength);
-                    }
-                    catch (Exception ex)
-                    {// we want to ignore exceptions here because the most critical part is logging the line.
-                        trackerId = string.Format("tid_ex({1},{2}): {0}", ex.Message, trackerStartIndex, trackerLength);
-                        Trace.WriteLine(ex.Message);
-                    }
+                    var currentMessage = ndc.Pop();
+                    if (currentMessage.StartsWith("tid:"))
+                        trackerId = currentMessage.Substring(4);
                 }
                 
                 string json = JsonConvert.SerializeObject(new LogMessageRequest

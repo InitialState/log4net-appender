@@ -51,15 +51,10 @@ namespace Log4Net.InitialStateAppender
                 webRequest.ContentType = "application/json";
 
                 string trackerId = null;
-                //if (!string.IsNullOrEmpty(typedLoggingEvent))
 
-                var ndc = LogicalThreadContext.Stacks["NDC"];
-
-                for (int i = 0; i < ndc.Count; i++)
+                if (logMessage.Contains("tid:"))
                 {
-                    var currentMessage = ndc.Pop();
-                    if (currentMessage.StartsWith("tid:"))
-                        trackerId = currentMessage.Substring(4);
+                    trackerId = logMessage.Substring(logMessage.IndexOf("tid:") + 1, logMessage.IndexOf(":tid"));
                 }
                 
                 string json = JsonConvert.SerializeObject(new LogMessageRequest

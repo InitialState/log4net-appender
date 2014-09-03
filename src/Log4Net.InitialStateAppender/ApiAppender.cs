@@ -38,7 +38,7 @@ namespace Log4Net.InitialStateAppender
             {
                 var typedLoggingEvent = (LoggingEvent) loggingEvent;
                 string logMessage = RenderLoggingEvent(typedLoggingEvent);
-                string url = string.Format("{0}{1}?clientKey={2}", ApiRootUrl, BucketId, ApiKey);
+                string url = string.Format("{0}{1}/{2}", ApiRootUrl, BucketId, ApiKey);
 
                 Trace.WriteLine(url);
                 Trace.WriteLine(logMessage);
@@ -50,19 +50,19 @@ namespace Log4Net.InitialStateAppender
                 webRequest.Proxy = null;
                 webRequest.ContentType = "application/json";
 
-                //string trackerId = null;
+                string trackerId = null;
 
-                //if (logMessage.Contains("tid:"))
-                //{
-                //    trackerId = logMessage.Substring(logMessage.IndexOf("tid:") + 1, logMessage.IndexOf(":tid"));
-                //}
+                if (logMessage.Contains("tid:"))
+                {
+                    trackerId = logMessage.Substring(logMessage.IndexOf("tid:") + 1, logMessage.IndexOf(":tid"));
+                }
                 
                 string json = JsonConvert.SerializeObject(new LogMessageRequest
                                                           {
                                                               Log = logMessage,
                                                               DateTime = DateTime.UtcNow,
                                                               SignalSource = typedLoggingEvent.LoggerName,
-                                                              //TrackerId = trackerId
+                                                              TrackerId = trackerId
                                                           });
                 byte[] contentBytes = Encoding.UTF8.GetBytes(json);
                 webRequest.ContentLength = contentBytes.Length;
@@ -83,9 +83,13 @@ namespace Log4Net.InitialStateAppender
 
         private class LogMessageRequest
         {
+            [JsonProperty(PropertyName = "log")]
             public string Log { get; set; }
+            [JsonProperty(PropertyName = "date_time")]
             public DateTime DateTime { get; set; }
+            [JsonProperty(PropertyName = "signal_source")]
             public string SignalSource { get; set; }
+            [JsonProperty(PropertyName = "tracker_id")]
             public string TrackerId { get; set; }
         }
     }

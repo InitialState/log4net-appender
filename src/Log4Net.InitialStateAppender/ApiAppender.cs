@@ -7,6 +7,7 @@ using System.Threading;
 using log4net;
 using log4net.Appender;
 using log4net.Core;
+using log4net.Util;
 using Newtonsoft.Json;
 
 namespace Log4Net.InitialStateAppender
@@ -51,12 +52,13 @@ namespace Log4Net.InitialStateAppender
                 webRequest.ContentType = "application/json";
 
                 string trackerId = null;
-
-                if (logMessage.Contains("tid:"))
+                var ndc = typedLoggingEvent.LookupProperty("NDC") as ThreadContextStack;
+                if (ndc != null && ndc.Count > 0)
                 {
-                    trackerId = logMessage.Substring(logMessage.IndexOf("tid:") + 1, logMessage.IndexOf(":tid"));
+                    // the NDC represents a context stack, whose levels are separated by whitespace. we will use this as our MessageId.
+                    trackerId = ndc.ToString();
                 }
-                
+
                 string json = JsonConvert.SerializeObject(new LogMessageRequest
                                                           {
                                                               Log = logMessage,

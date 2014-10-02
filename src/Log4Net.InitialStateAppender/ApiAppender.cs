@@ -1,10 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
-using System.IO;
-using System.Net;
-using System.Text;
+using System.Net.Http;
 using System.Threading;
-using log4net;
 using log4net.Appender;
 using log4net.Core;
 using log4net.Util;
@@ -17,7 +14,6 @@ namespace Log4Net.InitialStateAppender
         public string ApiKey { get; set; }
         public string ApiRootUrl { get; set; }
         public Guid BucketId { get; set; }
-        public string Ndc { get; set; }
 
         protected override void Append(LoggingEvent loggingEvent)
         {
@@ -39,42 +35,30 @@ namespace Log4Net.InitialStateAppender
             {
                 var typedLoggingEvent = (LoggingEvent) loggingEvent;
                 string logMessage = RenderLoggingEvent(typedLoggingEvent);
-                string url = string.Format("{0}{1}/{2}", ApiRootUrl, BucketId, ApiKey);
 
-                Trace.WriteLine(url);
                 Trace.WriteLine(logMessage);
 
-                WebRequest webRequest = WebRequest.Create(url);
-                webRequest.Method = "POST";
-
-                //speed up the request by not autodetecting proxy http://go.microsoft.com/fwlink/?linkid=14202
-                webRequest.Proxy = null;
-                webRequest.ContentType = "application/json";
-
-                string trackerId = null;
-                var ndc = typedLoggingEvent.LookupProperty("NDC") as ThreadContextStack;
-                if (ndc != null && ndc.Count > 0)
+                using (var client = new HttpClient())
                 {
-                    // the NDC represents a context stack, whose levels are separated by whitespace. we will use this as our MessageId.
-                    trackerId = ndc.ToString();
-                }
+                    client.BaseAddress = new Uri(ApiRootUrl);
 
-                string json = JsonConvert.SerializeObject(new LogMessageRequest
-                                                          {
-                                                              Log = logMessage,
-                                                              DateTime = DateTime.UtcNow,
-                                                              SignalSource = typedLoggingEvent.LoggerName,
-                                                              TrackerId = trackerId
-                                                          });
-                byte[] contentBytes = Encoding.UTF8.GetBytes(json);
-                webRequest.ContentLength = contentBytes.Length;
-                Stream stream = webRequest.GetRequestStream();
-                stream.Write(contentBytes, 0, contentBytes.Length);
-                stream.Flush();
-                stream.Close();
-
-                using (webRequest.GetResponse())
-                {
+                    string trackerId = null;
+                    var ndc = typedLoggingEvent.LookupProperty("NDC") as ThreadContextStack;
+                    if (ndc != null && ndc.Count > 0)
+                    {
+                        // the NDC represents a context stack, whose levels are separated by whitespace. we will use this as our MessageId.
+                        trackerId = ndc.ToString();
+                    }
+                    var logMessageRequest = new LogMessageRequest
+                                            {
+                                                Log = logMessage,
+                                                DateTime = DateTime.UtcNow,
+                                                SignalSource =
+                                                    typedLoggingEvent
+                                                    .LoggerName,
+                                                TrackerId = trackerId
+                                            };
+                    client.PostAsJsonAsync(string.Format("{0}/{1}", BucketId, ApiKey), logMessageRequest);
                 }
             }
             catch (Exception ex)
@@ -87,10 +71,13 @@ namespace Log4Net.InitialStateAppender
         {
             [JsonProperty(PropertyName = "log")]
             public string Log { get; set; }
+
             [JsonProperty(PropertyName = "date_time")]
             public DateTime DateTime { get; set; }
+
             [JsonProperty(PropertyName = "signal_source")]
             public string SignalSource { get; set; }
+
             [JsonProperty(PropertyName = "tracker_id")]
             public string TrackerId { get; set; }
         }

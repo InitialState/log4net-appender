@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.Net.Http;
 using System.Threading;
+using System.Threading.Tasks;
 using log4net.Appender;
 using log4net.Core;
 using log4net.Util;
@@ -19,9 +20,7 @@ namespace Log4Net.InitialStateAppender
         {
             try
             {
-                var thread = new Thread(ShipLogMessage);
-                thread.IsBackground = true;
-                thread.Start(loggingEvent);
+                ShipLogMessageAsync(loggingEvent);
             }
             catch (Exception ex)
             {
@@ -29,12 +28,11 @@ namespace Log4Net.InitialStateAppender
             }
         }
 
-        private void ShipLogMessage(object loggingEvent)
+        async Task ShipLogMessageAsync(LoggingEvent loggingEvent)
         {
             try
             {
-                var typedLoggingEvent = (LoggingEvent) loggingEvent;
-                string logMessage = RenderLoggingEvent(typedLoggingEvent);
+                string logMessage = RenderLoggingEvent(loggingEvent);
 
                 Trace.WriteLine(logMessage);
 
@@ -43,22 +41,24 @@ namespace Log4Net.InitialStateAppender
                     client.BaseAddress = new Uri(ApiRootUrl);
 
                     string trackerId = null;
-                    var ndc = typedLoggingEvent.LookupProperty("NDC") as ThreadContextStack;
+                    var ndc = loggingEvent.LookupProperty("NDC") as ThreadContextStack;
                     if (ndc != null && ndc.Count > 0)
                     {
                         // the NDC represents a context stack, whose levels are separated by whitespace. we will use this as our MessageId.
                         trackerId = ndc.ToString();
                     }
                     var logMessageRequest = new LogMessageRequest
-                                            {
-                                                Log = logMessage,
-                                                DateTime = DateTime.UtcNow,
-                                                SignalSource =
-                                                    typedLoggingEvent
-                                                    .LoggerName,
-                                                TrackerId = trackerId
-                                            };
-                    client.PostAsJsonAsync(string.Format("{0}/{1}", BucketId, ApiKey), logMessageRequest);
+                    {
+                        Log = logMessage,
+                        DateTime = DateTime.UtcNow,
+                        SignalSource =
+                            loggingEvent
+                            .LoggerName,
+                        TrackerId = trackerId
+                    };
+                    HttpResponseMessage response = await client.PostAsJsonAsync(string.Format("{0}/{1}", BucketId, ApiKey), logMessageRequest);
+                    response.EnsureSuccessStatusCode();
+
                 }
             }
             catch (Exception ex)

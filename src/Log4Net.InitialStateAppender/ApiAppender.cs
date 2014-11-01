@@ -54,9 +54,10 @@ namespace Log4Net.InitialStateAppender
                         SignalSource =
                             loggingEvent
                             .LoggerName,
-                        TrackerId = trackerId
+                        TrackerId = trackerId,
+                        BucketId = BucketId
                     };
-                    HttpResponseMessage response = await client.PostAsJsonAsync(string.Format("{0}/{1}", BucketId, ApiKey), logMessageRequest);
+                    HttpResponseMessage response = await client.PostAsJsonAsync(string.Format("{0}", ApiKey), logMessageRequest);
                     response.EnsureSuccessStatusCode();
 
                 }
@@ -80,6 +81,9 @@ namespace Log4Net.InitialStateAppender
 
             [JsonProperty(PropertyName = "tracker_id")]
             public string TrackerId { get; set; }
+
+            [JsonProperty(PropertyName = "bucketId")]
+            public Guid BucketId { get; set; }
         }
     }
 }
